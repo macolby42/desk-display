@@ -3,22 +3,26 @@ const express = require('express')
 const cors = require('cors')
 const spotify = require('./spotify-services')
 const app = express()
-const port = 5000
+const port = process.env.PORT
 
 var token = null;
-var hash = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')
+var code = null;
+const hash = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64');
 
-var whitelist = ['http://localhost:3000']
-var corsOptions = {
+const SITE_NAME = process.env.SITE_NAME;
+
+const whitelist = [`http://${SITE_NAME}:3000`, `http://${SITE_NAME}:5000`, 'https://api.spotify.com', 'https://accounts.spotify.com']
+app.use(cors({
   origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
+    
+    if (!origin) return callback(null, true);
+    if (whitelist.indexOf(origin) === -1) {
       callback(new Error('Not allowed by CORS'))
     }
+
+    return callback(null, true)
   }
-}
-app.use(cors(corsOptions));
+}));
   
 
 function refreshToken() {
@@ -32,16 +36,22 @@ function updateToken(req) {
     })
 }
 
+function getToken() {
+    req = spotify.getToken(code, hash, process.env.REDIRECT_URI);
+    updateToken(req)
+    // res.redirect('/spotify');
+}
+
 //
 // Entry Point
 //
 
 app.get('/', (req, res) => {
-    if(token == null || token == undefined) {
-        res.redirect('/code')
+    if(!token) {
+        return res.redirect('/login')
     }
     else {
-        res.redirect('/spotify')
+        return res.redirect('/spotify')
     }
 })
 
@@ -50,8 +60,12 @@ app.get('/', (req, res) => {
 //
 
 app.get('/spotify', (req, res) => {
+    if (code == null) {
+        return res.redirect('/login')
+    }
     if(token == null) {
-        return res.redirect('/code')
+        code = req.query.code;
+        getToken()
     }
     req = spotify.getMe(token)
 
@@ -64,8 +78,12 @@ app.get('/spotify', (req, res) => {
 })
 
 app.get('/spotify/current', (req, res) => {
+    if (code == null) {
+        return res.redirect('/login')
+    }
     if(token == null) {
-        return res.redirect('/code')
+        code = req.query.code;
+        getToken()
     }
     req = spotify.getPlayer(token)
 
@@ -81,17 +99,11 @@ app.get('/spotify/current', (req, res) => {
 // Authorization Methods
 //
 
-app.get('/code', (req, res) => {
+app.get('/login', (req, res) => {
     spotify.generateState()
     scope = "user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state"
     url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=${scope}&state=${spotify.getState()}`;
     res.redirect(url);
-})
-
-app.get('/token', (req, res) => {
-    req = spotify.getToken(req.query.code, hash, process.env.REDIRECT_URI);
-    updateToken(req)
-    res.redirect('/spotify');
 })
 
 app.listen(port, () => console.log(`${process.env.APP_NAME} listening on port ${port}!`))
