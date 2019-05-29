@@ -1,0 +1,36 @@
+{
+  "name": "desk-display",
+  "version": "1.0.0",
+  "description": "A webservice used to send data to be printed on a display for my desk.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/macolby42/desk-display.git"
+  },
+  "keywords": [
+    "node",
+    "python",
+    "raspberry",
+    "pi",
+    "zero",
+    "display",
+    "music"
+  ],
+  "author": "Michael Colby",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/macolby42/desk-display/issues"
+  },
+  "homepage": "https://github.com/macolby42/desk-display#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "generator": "^1.0.1",
+    "node-fetch": "^2.6.0",
+    "request": "^2.88.0"
+  }
+}
