@@ -3,7 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const spotify = require('./spotify-services')
 const app = express()
-const port = 80
+const port = process.env.PORT
 
 var token = null;
 var code = null;
