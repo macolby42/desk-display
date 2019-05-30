@@ -17,7 +17,14 @@ var spotify = {
             }
         }
         
-        return request.post(options)
+        let temp = []
+        return request.post(options, function (err, resp, body) {
+            console.log(body)
+        }).on('data', (d) => {
+            temp.push(d)
+        }).on('end', () => {
+            temp = JSON.parse(Buffer.concat(temp).toString())
+        })
     },
 
     getMe: function(token) {

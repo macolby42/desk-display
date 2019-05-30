@@ -31,7 +31,8 @@ app.use(cors({
 function login(res) {
     spotify.generateState()
     scope = "user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state"
-    url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=${scope}&state=${spotify.getState()}`;
+    url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&scope=${scope}&state=${spotify.getState()}`;
+    console.log(url)
     return res.redirect(url);
 }
   
@@ -42,13 +43,16 @@ function refreshToken() {
 }
 
 function updateToken(req) {
+    let temp =[]
     req.on('data', (d) => {
-        token = JSON.parse(d.toString())
+        temp.push(d)
+    }).on('end', () => {
+        token = JSON.parse(Buffer.concat(temp).toString())
     })
 }
 
 function getToken() {
-    req = spotify.getToken(code, hash, process.env.REDIRECT_URI);
+    var req = spotify.getToken(code, hash, process.env.REDIRECT_URI);
     updateToken(req)
     // res.redirect('/spotify');
 }
@@ -59,6 +63,7 @@ function getToken() {
 
 app.get('/', (req, res) => {
     if(!token) {
+        console.log("Needing token...")
         return login(res)
     }
     else {
@@ -70,14 +75,16 @@ app.get('/', (req, res) => {
 // API Methods
 //
 
+// this method has special checks since it is the auth callback
 app.get('/spotify', (req, res) => {
-    if (code == null) {
+    if (!req.query.code && code == null) {
         return login(res)
     }
-    if(token == null) {
+    if (req.query.code && !token) {
         code = req.query.code;
         getToken()
     }
+
     req = spotify.getMe(token)
 
     if(req.statusCode == 401) {
@@ -93,7 +100,6 @@ app.get('/spotify/current', (req, res) => {
         return login(res)
     }
     if(token == null) {
-        code = req.query.code;
         getToken()
     }
     req = spotify.getPlayer(token)
