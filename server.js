@@ -71,7 +71,7 @@ app.get('/spotify', (req, res) => {
 
     if(req.statusCode == 401) {
         refreshToken()
-        return res.redirect('/spotify')
+        req = spotify.getMe(token)
     }
 
     req.pipe(res);
@@ -89,7 +89,7 @@ app.get('/spotify/current', (req, res) => {
 
     if(req.statusCode == 401) {
         refreshToken()
-        return res.redirect('/spotify/current')
+        req = spotify.getPlayer(token)
     }
 
     req.pipe(res);
