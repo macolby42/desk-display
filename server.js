@@ -23,6 +23,17 @@ app.use(cors({
     return callback(null, true)
   }
 }));
+
+//
+// Authorization Methods
+//
+
+function login() {
+    spotify.generateState()
+    scope = "user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state"
+    url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=${scope}&state=${spotify.getState()}`;
+    res.redirect(url);
+}
   
 
 function refreshToken() {
@@ -48,7 +59,7 @@ function getToken() {
 
 app.get('/', (req, res) => {
     if(!token) {
-        return res.redirect('/login')
+        login()
     }
     else {
         return res.redirect('/spotify')
@@ -61,7 +72,7 @@ app.get('/', (req, res) => {
 
 app.get('/spotify', (req, res) => {
     if (code == null) {
-        return res.redirect('/login')
+        login()
     }
     if(token == null) {
         code = req.query.code;
@@ -79,7 +90,7 @@ app.get('/spotify', (req, res) => {
 
 app.get('/spotify/current', (req, res) => {
     if (code == null) {
-        return res.redirect('/login')
+        login()
     }
     if(token == null) {
         code = req.query.code;
@@ -93,17 +104,6 @@ app.get('/spotify/current', (req, res) => {
     }
 
     req.pipe(res);
-})
-
-//
-// Authorization Methods
-//
-
-app.get('/login', (req, res) => {
-    spotify.generateState()
-    scope = "user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state"
-    url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=${scope}&state=${spotify.getState()}`;
-    res.redirect(url);
 })
 
 app.listen(port, () => console.log(`${process.env.APP_NAME} listening on port ${port}!`))
