@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/macolby42/desk-display.git"
   },
+  "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build",
   "keywords": [
     "node",
     "python",
