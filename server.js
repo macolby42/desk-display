@@ -34,7 +34,7 @@ function login(res) {
     scope = "user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state"
     url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&scope=${scope}&state=${spotify.getState()}`;
     console.log(url)
-    return res.redirect({headers: { "Access-Control-Allow-Origin": "*"}}, url);
+    return res.redirect(url);
 }
   
 
