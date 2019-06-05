@@ -4,13 +4,13 @@
   "description": "A webservice used to send data to be printed on a display for my desk.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/macolby42/desk-display.git"
   },
-  "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build",
   "keywords": [
     "node",
     "python",
