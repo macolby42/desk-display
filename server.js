@@ -9,20 +9,21 @@ var token = null;
 var code = null;
 const hash = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64');
 
-const SITE_NAME = process.env.SITE_NAME;
+// const SITE_NAME = process.env.SITE_NAME;
 
-const whitelist = [`http://${SITE_NAME}:3000`, `http://${SITE_NAME}:5000`, 'https://api.spotify.com', 'https://accounts.spotify.com']
-app.use(cors({
-  origin: function (origin, callback) {
-    
-    if (!origin) return callback(null, true);
-    if (whitelist.indexOf(origin) === -1) {
-      callback(new Error('Not allowed by CORS'))
+const whitelist = [`http://localhost:3000`, 'https://api.spotify.com', 'https://accounts.spotify.com']
+const corsOptions = {
+    origin: function (origin, callback) {
+      
+      if (!origin) return callback(null, true);
+      if (whitelist.indexOf(origin) === -1) {
+        callback(new Error('Not allowed by CORS'))
+      }
+  
+      return callback(null, true)
     }
-
-    return callback(null, true)
-  }
-}));
+  };
+app.use(cors(corsOptions));
 
 //
 // Authorization Methods
@@ -33,7 +34,7 @@ function login(res) {
     scope = "user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state"
     url =`https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&scope=${scope}&state=${spotify.getState()}`;
     console.log(url)
-    return res.redirect(url);
+    return res.redirect(url, {headers: { "Access-Control-Allow-Origin": "*"}});
 }
   
 
@@ -76,7 +77,7 @@ app.get('/', (req, res) => {
 //
 
 // this method has special checks since it is the auth callback
-app.get('/spotify', (req, res) => {
+app.get('/spotify', cors(corsOptions), (req, res) => {
     if (!req.query.code && code == null) {
         return login(res)
     }
