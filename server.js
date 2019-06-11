@@ -89,7 +89,7 @@ app.get('/spotify', cors(corsOptions), (req, res) => {
 
     req = spotify.getMe(token)
 
-    if(req.statusCode == 401) {
+    if(req.status == 401) {
         refreshToken()
         req = spotify.getMe(token)
     }
@@ -106,7 +106,7 @@ app.get('/spotify/current', (req, res) => {
     }
     req = spotify.getPlayer(token)
 
-    if(req.statusCode == 401) {
+    if(req.status == 401) {
         refreshToken()
         req = spotify.getPlayer(token)
     }
